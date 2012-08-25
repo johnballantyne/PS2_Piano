@@ -16,6 +16,7 @@ int timehigh[] = {
 };
 int std_freq = 440;
 boolean buffer_open = false;
+boolean buffer_repeat = false;
 int buffer_pos = 0;
 int buffer_size = 64;
 char buffer[64];
@@ -34,6 +35,8 @@ void loop() {
   if (keyboard.available())  {
     char c = keyboard.read();
     
+    if (c == '|')
+      buffer_repeat = !buffer_repeat;
     if (c == '\\') {
       if (buffer_open) {
         for (int i = 0; i < buffer_size; i++)
@@ -102,12 +105,14 @@ void playNote(char note, int duration) {
 }
 
 void playMelody(char melody[]) {
- for (int i = 0; i < buffer_size; i++)
-   if (buffer[i] == ' ')
-     delay(tempo);
-   else
-     for (int j = 0; j < num_keys; j++)
-        if (buffer[i] == keymap[j]) 
-          playTone(timehigh[j], tempo); 
+  do {
+   for (int i = 0; i < buffer_size; i++)
+     if (buffer[i] == ' ')
+       delay(tempo);
+     else
+       for (int j = 0; j < num_keys; j++)
+          if (buffer[i] == keymap[j]) 
+            playTone(timehigh[j], tempo); 
+  } while (buffer_repeat == true);
 }
 
