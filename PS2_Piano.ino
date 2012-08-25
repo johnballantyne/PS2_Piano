@@ -5,9 +5,11 @@ const int CLK_PIN =  3;
 const int PIEZO_PIN = 8;
 
 PS2Keyboard keyboard;
+char keymap[] = "zsxdcvgbhnjmq2w3er5t6y7uZSXDCVGBHNJMQ@W#ER%T6Y&UI";
+int low_halftone = -33;
+int high_halftone = 15;
 
-void setup()
-{
+void setup() {
   delay(1000);
   pinMode(PIEZO_PIN, OUTPUT);
   keyboard.begin(DATA_PIN, CLK_PIN);
@@ -15,14 +17,11 @@ void setup()
   Serial.println("[ PS2 Piano ]");
 }
 
-void loop()
-{
-  if (keyboard.available()) 
-  {
+void loop() {
+  if (keyboard.available())  {
     char c = keyboard.read();
 
-    switch(c)
-    {
+    switch(c) {
       case PS2_ENTER: Serial.println(); break;
       case PS2_TAB: Serial.print("[Tab]"); break;
       case PS2_ESC: Serial.print("[Esc]"); break;
@@ -33,9 +32,16 @@ void loop()
       case PS2_UPARROW: Serial.print("[Up]"); break;
       case PS2_DOWNARROW: Serial.print("[Down]"); break;
       case PS2_DELETE: Serial.print("[Del]"); break;
+      case 'z': playNote('c', 300); break;
+      case 'x': playNote('d', 300); break;
+      case 'c': playNote('e', 300); break;
+      case 'v': playNote('f', 300); break;
+      case 'b': playNote('g', 300); break;
+      case 'n': playNote('a', 300); break;
+      case 'm': playNote('b', 300); break;
+      case ',': playNote('C', 300); break;
       default: Serial.print(c);  break;
     }
-    playNote('c', 300);
   }
 }
 
