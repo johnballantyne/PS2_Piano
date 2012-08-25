@@ -5,7 +5,16 @@ const int CLK_PIN =  3;
 const int PIEZO_PIN = 8;
 
 PS2Keyboard keyboard;
-char keymap[] = "zsxdcvgbhnjmq2w3er5t6y7uZSXDCVGBHNJMQ@W#ER%T6Y&UI";
+int num_keys = 49;
+char keymap[] = "zsxdcvgbhnjmq2w3er5t6y7uZSXDCVGBHNJMQ@W#ER%T^Y&UI";
+int timehigh[] = {
+  7645, 7215, 6810, 6428, 6067, 5727, 5405, 5102, 4816, 4545, 4290, 4050,
+  3822, 3608, 3405, 3214, 3034, 2863, 2703, 2551, 2408, 2273, 2145, 2025,
+  1911, 1804, 1703, 1607, 1517, 1432, 1351, 1276, 1204, 1136, 1073, 1012,
+  956, 902, 851, 804, 758, 716, 676, 638, 602, 568, 536, 506,
+  478 
+};
+int std_freq = 440;
 int low_halftone = -33;
 int high_halftone = 15;
 
@@ -20,6 +29,10 @@ void setup() {
 void loop() {
   if (keyboard.available())  {
     char c = keyboard.read();
+    
+    for (int i = 0; i < num_keys; i++)
+      if (c == keymap[i]) 
+        playTone(timehigh[i], 300);
 
     switch(c) {
       case PS2_ENTER: Serial.println(); break;
@@ -32,14 +45,6 @@ void loop() {
       case PS2_UPARROW: Serial.print("[Up]"); break;
       case PS2_DOWNARROW: Serial.print("[Down]"); break;
       case PS2_DELETE: Serial.print("[Del]"); break;
-      case 'z': playNote('c', 300); break;
-      case 'x': playNote('d', 300); break;
-      case 'c': playNote('e', 300); break;
-      case 'v': playNote('f', 300); break;
-      case 'b': playNote('g', 300); break;
-      case 'n': playNote('a', 300); break;
-      case 'm': playNote('b', 300); break;
-      case ',': playNote('C', 300); break;
       default: Serial.print(c);  break;
     }
   }
