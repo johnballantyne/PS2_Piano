@@ -15,8 +15,12 @@ int timehigh[] = {
   478 
 };
 int std_freq = 440;
-int low_halftone = -33;
-int high_halftone = 15;
+boolean buffer_open = false;
+int buffer_pos = 0;
+int buffer_size = 64;
+char buffer[64];
+int tempo = 300;
+
 
 void setup() {
   delay(1000);
@@ -30,9 +34,35 @@ void loop() {
   if (keyboard.available())  {
     char c = keyboard.read();
     
-    for (int i = 0; i < num_keys; i++)
-      if (c == keymap[i]) 
-        playTone(timehigh[i], 300);
+    if (c == '\\') {
+      if (buffer_open) {
+        for (int i = 0; i < buffer_size; i++)
+          buffer[i] = 0;
+          
+        buffer_open = false;
+      }
+       else
+        buffer_open = true;
+    }
+    
+    else if (c == PS2_ENTER) {
+      playMelody(buffer);
+      buffer_open = false;
+    }
+      
+    else if (buffer_open)
+      buffer[buffer_pos++] = c;
+      
+    else if (c == ' ')
+      delay(tempo);
+      
+    else
+      for (int i = 0; i < num_keys; i++)
+        if (c == keymap[i]) 
+          playTone(timehigh[i], tempo);
+      
+     
+      
 
     switch(c) {
       case PS2_ENTER: Serial.println(); break;
@@ -70,3 +100,14 @@ void playNote(char note, int duration) {
     }
   }
 }
+
+void playMelody(char melody[]) {
+ for (int i = 0; i < buffer_size; i++)
+   if (buffer[i] == ' ')
+     delay(tempo);
+   else
+     for (int j = 0; j < num_keys; j++)
+        if (buffer[i] == keymap[j]) 
+          playTone(timehigh[j], tempo); 
+}
+
