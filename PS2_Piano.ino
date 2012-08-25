@@ -1,10 +1,10 @@
-#include <PS2Keyboard.h>
+#include <PS2Keyboard2.h>
 
 const int DATA_PIN = 2;
 const int CLK_PIN =  3;
 const int PIEZO_PIN = 8;
 
-PS2Keyboard keyboard;
+PS2Keyboard2 keyboard;
 int num_keys = 49;
 char keymap[] = "zsxdcvgbhnjmq2w3er5t6y7uZSXDCVGBHNJMQ@W#ER%T^Y&UI";
 int timehigh[] = {
@@ -20,7 +20,7 @@ boolean buffer_repeat = false;
 int buffer_pos = 0;
 int buffer_size = 64;
 char buffer[64];
-int tempo = 300;
+int tempo = 150;
 
 
 void setup() {
@@ -37,7 +37,7 @@ void loop() {
     
     if (c == '|')
       buffer_repeat = !buffer_repeat;
-    if (c == '\\') {
+    else if (c == '\\') {
       if (buffer_open) {
         for (int i = 0; i < buffer_size; i++)
           buffer[i] = 0;
@@ -48,6 +48,12 @@ void loop() {
         buffer_open = true;
     }
     
+    else if (c == '[')
+      tempo += 50;
+    
+    else if (c == ']')
+      tempo -= 50;
+    
     else if (c == PS2_ENTER) {
       playMelody(buffer);
       buffer_open = false;
@@ -57,29 +63,18 @@ void loop() {
       buffer[buffer_pos++] = c;
       
     else if (c == ' ')
+    {
       delay(tempo);
+      delay (tempo / 4);
+    }
       
     else
       for (int i = 0; i < num_keys; i++)
         if (c == keymap[i]) 
+        {
           playTone(timehigh[i], tempo);
-      
-     
-      
-
-    switch(c) {
-      case PS2_ENTER: Serial.println(); break;
-      case PS2_TAB: Serial.print("[Tab]"); break;
-      case PS2_ESC: Serial.print("[Esc]"); break;
-      case PS2_PAGEDOWN: Serial.print("[PgDn]"); break;
-      case PS2_PAGEUP: Serial.print("[PgUp]"); break;
-      case PS2_LEFTARROW: Serial.print("[Left]"); break;
-      case PS2_RIGHTARROW: Serial.print("[Right]"); break;
-      case PS2_UPARROW: Serial.print("[Up]"); break;
-      case PS2_DOWNARROW: Serial.print("[Down]"); break;
-      case PS2_DELETE: Serial.print("[Del]"); break;
-      default: Serial.print(c);  break;
-    }
+          delay(25);
+        }
   }
 }
 
@@ -92,27 +87,26 @@ void playTone(int tone, int duration) {
   }
 }
 
-void playNote(char note, int duration) {
-  char names[] = { 'c', 'd', 'e', 'f', 'g', 'a', 'b', 'C' };
-  int tones[] = { 1915, 1700, 1519, 1432, 1275, 1136, 1014, 956 };
-  
-  // play the tone corresponding to the note name
-  for (int i = 0; i < 8; i++) {
-    if (names[i] == note) {
-      playTone(tones[i], duration);
-    }
-  }
-}
-
 void playMelody(char melody[]) {
   do {
-   for (int i = 0; i < buffer_size; i++)
-     if (buffer[i] == ' ')
-       delay(tempo);
-     else
-       for (int j = 0; j < num_keys; j++)
+    for (int i = 0; i < buffer_size; i++)
+      if (buffer[i] == ' ')
+        delay(tempo);
+    
+      else
+        for (int j = 0; j < num_keys; j++)
           if (buffer[i] == keymap[j]) 
-            playTone(timehigh[j], tempo); 
+          {
+            playTone(timehigh[j], tempo);
+            delay(tempo / 4);
+          }
+    
+    if (keyboard.available()) {
+      char c = keyboard.read();
+      if (c == '|')
+        buffer_repeat = !buffer_repeat;
+    }
   } while (buffer_repeat == true);
 }
+
 
